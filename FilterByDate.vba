@@ -14,33 +14,36 @@ Sub ConvertAndFilterBySpecificDateRange()
     For Each ws In ThisWorkbook.Sheets
         ' Find the last row in the sheet (based on column J)
         lastRow = ws.Cells(ws.Rows.Count, "J").End(xlUp).Row
+        ' Skip if only headers are present
+        If lastRow < 2 Then GoTo NextSheet
         
         ' Find the last column in the sheet (based on the first row)
         lastCol = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
 
-        ' Convert custom date format in column J to actual date values
+        ' Ensure Column J is recognized as a date format
+        ws.Columns("J").NumberFormat = "mm/dd/yyyy"
+
+        ' Convert text dates to actual date values
         For Each cell In ws.Range("J2:J" & lastRow)
             If Not IsError(cell.Value) And IsDate(cell.Value) Then
                 cell.Value = CDate(cell.Value)
             End If
         Next cell
 
-        ' Ensure AutoFilter is applied to the first row
-        If ws.AutoFilterMode Then
-            ws.AutoFilterMode = False ' Turn off autofilter if already applied
-        End If
-        
-        ' Clear existing filters if present
-        If ws.FilterMode Then
-            ws.ShowAllData
-        End If
+        ' Remove existing filters if present
+        If ws.FilterMode Then ws.ShowAllData
+        If ws.AutoFilterMode Then ws.AutoFilterMode = False
 
         ' Apply AutoFilter to show only the specified date range
         ws.Range(ws.Cells(1, 1), ws.Cells(lastRow, lastCol)).AutoFilter Field:=10, _
             Criteria1:=">=" & Format(startDate, "mm/dd/yyyy"), _
             Operator:=xlAnd, _
             Criteria2:="<=" & Format(endDate, "mm/dd/yyyy")
+
+NextSheet:
     Next ws
     
     MsgBox "Converted custom dates and filtered all sheets to show values from August 2024 to December 2024.", vbInformation
 End Sub
+
+
