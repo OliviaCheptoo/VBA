@@ -17,21 +17,21 @@ Sub UpdateSalesAndStocks()
     Dim codeDict As Object
     Dim mergeState As Variant
 
-    ' === MONTHLY SETTINGS - update these column letters each month ===
+    ' === MONTHLY SETTINGS(JULY) - update these column letters each month ===
     ' Left side  = column letter on "New"
     ' Right side = column letter on "Workings"
-    Const COL_SALES_NEW As String = "BU"        ' Qty Sales (current month)
-    Const COL_SALES_WORK As String = "AX"
+    Const COL_SALES_NEW As String = "BV"        ' Qty Sales (current month)
+    Const COL_SALES_WORK As String = "AY"
     Const COL_SALES_TOTAL_NEW As String = "CB"   ' Sales Total
-    Const COL_SALES_TOTAL_WORK As String = "AY"
+    Const COL_SALES_TOTAL_WORK As String = "AZ"
     Const COL_PHYS_STOCK_NEW As String = "CO"    ' Physical Stock
-    Const COL_PHYS_STOCK_WORK As String = "BG"
+    Const COL_PHYS_STOCK_WORK As String = "BI"
     Const COL_SEA_NEW As String = "CP"           ' Sea
-    Const COL_SEA_WORK As String = "BH"
+    Const COL_SEA_WORK As String = "BJ"
     Const COL_GRL_NEW As String = "CQ"           ' GRL
-    Const COL_GRL_WORK As String = "BI"
+    Const COL_GRL_WORK As String = "BK"
     Const COL_UNSHIPPED_NEW As String = "CR"     ' Unshipped
-    Const COL_UNSHIPPED_WORK As String = "BJ"
+    Const COL_UNSHIPPED_WORK As String = "BL"
     ' ===================================================================
 
     On Error GoTo CleanFail
