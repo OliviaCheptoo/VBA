@@ -15,21 +15,32 @@ Sub UpdateMetrics()
 
     Dim itemCode As String
     Dim workCode As String
+    Dim channel As String
 
 '==================================================================
 '                    CHANGE THESE SETTINGS ONLY
 '==================================================================
 
-    Const SOURCE_SHEET As String = "Sales"
+    Const SOURCE_SHEET As String = "Budget"
 
-    Const COL_CODE As String = "R"
-    Const COL_QTY As String = "T"
-    Const COL_REV As String = "AA"
-    Const COL_GP As String = "AC"
+    Const COL_CODE As String = "E"
+    Const COL_CHANNEL As String = "D"      '<< CHANGE TO YOUR CHANNEL COLUMN
 
-    Const DEST_QTY As String = "BU"
-    Const DEST_REV As String = "BV"
-    Const DEST_GP As String = "BW"
+    'Change these depending on the month/YTD you want
+    Const COL_QTY As String = "K"
+    Const COL_REV As String = "X"
+    Const COL_GP As String = "AK"
+
+    Const FILTER_CHANNEL As String = "MT"
+    ' "" = All Channels
+    ' "MT"
+    ' "B2B"
+    ' "ONLINE"
+    ' "EXPORT"
+
+    Const DEST_QTY As String = "HT"
+    Const DEST_REV As String = "HU"
+    Const DEST_GP As String = "HV"
 
     Const CONVERT_CODE_TO_NUMBER As Boolean = False
 
@@ -57,6 +68,18 @@ Sub UpdateMetrics()
     '==================================================
 
     For i = 1 To UBound(arr, 1)
+
+        '----------------------------------------------
+        ' Channel Filter
+        '----------------------------------------------
+
+        channel = UCase(Trim(CStr(wsSource.Cells(i + 1, ColLetterToNum(COL_CHANNEL)).Value)))
+
+        If FILTER_CHANNEL <> "" Then
+            If channel <> UCase(FILTER_CHANNEL) Then GoTo NextRow
+        End If
+
+        '----------------------------------------------
 
         If CONVERT_CODE_TO_NUMBER Then
             itemCode = Trim(CStr(Val(arr(i, 1))))
@@ -95,6 +118,7 @@ Sub UpdateMetrics()
 
         End If
 
+NextRow:
     Next i
 
     '==================================================
