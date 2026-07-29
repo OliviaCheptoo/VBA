@@ -24,8 +24,8 @@ Sub PullFromNew()
 
     ' === HEADER ROW LOCATIONS ===
     Const NEW_HEADER_ROW As Long = 1
-    Const WORK_MONTH_ROW As Long = 1   ' e.g. "Dec", "Jan", "Feb"...
-    Const WORK_SUB_ROW As Long = 2     ' "P" / "S" / "G"
+    Const WORK_MONTH_ROW As Long = 2   ' e.g. "Dec", "Jan", "Feb"...
+    Const WORK_SUB_ROW As Long = 3     ' "P" / "S" / "G"
     ' =============================
 
     ' === MONTHLY MAPPING - edit this table to add, remove, or change a month ===
