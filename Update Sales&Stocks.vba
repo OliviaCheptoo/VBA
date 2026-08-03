@@ -1,132 +1,331 @@
+Option Explicit
+
 Sub UpdateSalesAndStocks()
+
     Dim wsNew As Worksheet
     Dim wsWork As Worksheet
+    
     Dim lastRowNew As Long
     Dim lastRowWork As Long
+    
     Dim newRow As Long
     Dim workRow As Long
+    
     Dim itemCodeWork As String
     Dim itemModelNew As String
     Dim extractedCode As String
+    
     Dim dashPos As Long
     Dim i As Long
+    
     Dim srcCell As Range
     Dim dstCell As Range
+    
     Dim colMap(0 To 5, 0 To 1) As Long
+    
     Dim modelArr As Variant
     Dim codeDict As Object
+    
     Dim mergeState As Variant
+    
+    Dim lookupColNew As Long
+    Dim lookupColWork As Long
 
-    ' === MONTHLY SETTINGS(AUG) - update these column letters each month ===
-    ' Left side  = column letter on "New"
-    ' Right side = column letter on "Workings"
-    Const COL_SALES_NEW As String = "BV"        ' Qty Sales (current month)
+
+    ' ================================================================
+    '                     MONTHLY SETTINGS
+    ' ================================================================
+    
+    ' --- START ROWS ---
+    Const START_ROW_NEW As Long = 2
+    Const START_ROW_WORK As Long = 3
+    
+    
+    ' --- LOOKUP KEY COLUMNS ---
+    ' New = column containing text such as:
+    '       "12345 - Samsung Oven"
+    '
+    ' Workings = column containing the item code:
+    '       "12345"
+    
+    Const LOOKUP_COL_NEW As String = "E"
+    Const LOOKUP_COL_WORK As String = "D"
+    
+    
+    ' --- SALES / STOCK COLUMN MAPPING ---
+    '
+    ' Left side  = column on "New"
+    ' Right side = column on "Workings"
+    
+    Const COL_SALES_NEW As String = "BV"
     Const COL_SALES_WORK As String = "AZ"
-    Const COL_SALES_TOTAL_NEW As String = "CB"   ' Sales Total
+    
+    Const COL_SALES_TOTAL_NEW As String = "CB"
     Const COL_SALES_TOTAL_WORK As String = "BA"
-    Const COL_PHYS_STOCK_NEW As String = "CO"    ' Physical Stock
+    
+    Const COL_PHYS_STOCK_NEW As String = "CO"
     Const COL_PHYS_STOCK_WORK As String = "BK"
-    Const COL_SEA_NEW As String = "CP"           ' Sea
+    
+    Const COL_SEA_NEW As String = "CP"
     Const COL_SEA_WORK As String = "BL"
-    Const COL_GRL_NEW As String = "CQ"           ' GRL
+    
+    Const COL_GRL_NEW As String = "CQ"
     Const COL_GRL_WORK As String = "BM"
-    Const COL_UNSHIPPED_NEW As String = "CR"     ' Unshipped
+    
+    Const COL_UNSHIPPED_NEW As String = "CR"
     Const COL_UNSHIPPED_WORK As String = "BN"
-    ' ===================================================================
+    
+    ' ================================================================
+    '                    END MONTHLY SETTINGS
+    ' ================================================================
+
 
     On Error GoTo CleanFail
 
+
+    ' ----------------------------------------------------------------
+    ' Set worksheets
+    ' ----------------------------------------------------------------
+    
     Set wsNew = ThisWorkbook.Sheets("New")
     Set wsWork = ThisWorkbook.Sheets("Workings")
 
-    ' --- COLUMN MAPPING: built from the letters above, (New col, Workings col) ---
-    colMap(0, 0) = ColLetterToNum(COL_SALES_NEW):       colMap(0, 1) = ColLetterToNum(COL_SALES_WORK)
-    colMap(1, 0) = ColLetterToNum(COL_SALES_TOTAL_NEW): colMap(1, 1) = ColLetterToNum(COL_SALES_TOTAL_WORK)
-    colMap(2, 0) = ColLetterToNum(COL_PHYS_STOCK_NEW):  colMap(2, 1) = ColLetterToNum(COL_PHYS_STOCK_WORK)
-    colMap(3, 0) = ColLetterToNum(COL_SEA_NEW):         colMap(3, 1) = ColLetterToNum(COL_SEA_WORK)
-    colMap(4, 0) = ColLetterToNum(COL_GRL_NEW):         colMap(4, 1) = ColLetterToNum(COL_GRL_WORK)
-    colMap(5, 0) = ColLetterToNum(COL_UNSHIPPED_NEW):   colMap(5, 1) = ColLetterToNum(COL_UNSHIPPED_WORK)
 
+    ' ----------------------------------------------------------------
+    ' Convert configurable column letters to column numbers
+    ' ----------------------------------------------------------------
+    
+    lookupColNew = ColLetterToNum(LOOKUP_COL_NEW)
+    lookupColWork = ColLetterToNum(LOOKUP_COL_WORK)
+
+
+    ' ----------------------------------------------------------------
+    ' Build source/destination column mapping
+    ' ----------------------------------------------------------------
+    
+    colMap(0, 0) = ColLetterToNum(COL_SALES_NEW)
+    colMap(0, 1) = ColLetterToNum(COL_SALES_WORK)
+    
+    colMap(1, 0) = ColLetterToNum(COL_SALES_TOTAL_NEW)
+    colMap(1, 1) = ColLetterToNum(COL_SALES_TOTAL_WORK)
+    
+    colMap(2, 0) = ColLetterToNum(COL_PHYS_STOCK_NEW)
+    colMap(2, 1) = ColLetterToNum(COL_PHYS_STOCK_WORK)
+    
+    colMap(3, 0) = ColLetterToNum(COL_SEA_NEW)
+    colMap(3, 1) = ColLetterToNum(COL_SEA_WORK)
+    
+    colMap(4, 0) = ColLetterToNum(COL_GRL_NEW)
+    colMap(4, 1) = ColLetterToNum(COL_GRL_WORK)
+    
+    colMap(5, 0) = ColLetterToNum(COL_UNSHIPPED_NEW)
+    colMap(5, 1) = ColLetterToNum(COL_UNSHIPPED_WORK)
+
+
+    ' ----------------------------------------------------------------
+    ' Improve performance
+    ' ----------------------------------------------------------------
+    
     Application.ScreenUpdating = False
     Application.EnableEvents = False
     Application.Calculation = xlCalculationManual
 
-    ' Only unmerge if the sheet actually has merged cells - skip the
-    ' (expensive, whole-sheet) UnMerge call otherwise.
-    ' UsedRange.MergeCells returns False if nothing is merged, True if the
-    ' whole range is one merge, Null if it's a mix - so Null or True both
-    ' mean "there's at least one merged cell somewhere".
+
+    ' ----------------------------------------------------------------
+    ' Unmerge cells if necessary
+    ' ----------------------------------------------------------------
+    
     mergeState = wsNew.UsedRange.MergeCells
+    
     If IsNull(mergeState) Or mergeState = True Then
         wsNew.Cells.UnMerge
     End If
 
-    lastRowNew = wsNew.Cells(wsNew.Rows.Count, 1).End(xlUp).Row
-    lastRowWork = wsWork.Cells(wsWork.Rows.Count, 4).End(xlUp).Row
 
-    ' --- Build a one-time lookup: extracted item code -> row on "New" ---
-    ' Replaces the old inner loop that re-scanned all of "New" for every
-    ' row of "Workings" (O(n*m)). This scan is O(n), and the match below
-    ' is O(1), so the whole thing runs in O(n+m) instead.
+    ' ----------------------------------------------------------------
+    ' Find last rows
+    ' ----------------------------------------------------------------
+    
+    lastRowNew = wsNew.Cells(wsNew.Rows.Count, lookupColNew).End(xlUp).Row
+    lastRowWork = wsWork.Cells(wsWork.Rows.Count, lookupColWork).End(xlUp).Row
+
+
+    ' ----------------------------------------------------------------
+    ' Build lookup dictionary
+    '
+    ' Key:
+    '   Extracted item code from New
+    '
+    ' Value:
+    '   Actual Excel row containing that item
+    ' ----------------------------------------------------------------
+    
     Set codeDict = CreateObject("Scripting.Dictionary")
+    
+    codeDict.CompareMode = vbTextCompare
 
-    If lastRowNew >= 2 Then
-        modelArr = wsNew.Range(wsNew.Cells(2, 5), wsNew.Cells(lastRowNew, 5)).Value
+
+    If lastRowNew >= START_ROW_NEW Then
+        
+        modelArr = wsNew.Range( _
+            wsNew.Cells(START_ROW_NEW, lookupColNew), _
+            wsNew.Cells(lastRowNew, lookupColNew) _
+        ).Value
+        
+        
         For i = 1 To UBound(modelArr, 1)
+            
             itemModelNew = Trim(CStr(modelArr(i, 1)))
+            
+            ' Find the first dash
             dashPos = InStr(itemModelNew, "-")
+            
+            
+            ' Extract item code
             If dashPos > 1 Then
                 extractedCode = Trim(Left(itemModelNew, dashPos - 1))
             Else
                 extractedCode = itemModelNew
             End If
+            
+            
+            ' Skip blank lookup cells
             If extractedCode <> "" Then
-                ' first match wins, same as Exit For did in the original
+                
+                ' First matching item wins
                 If Not codeDict.Exists(extractedCode) Then
-                    codeDict.Add extractedCode, i + 1  ' array is offset by header row
+                    
+                    codeDict.Add _
+                        extractedCode, _
+                        i + START_ROW_NEW - 1
+                    
                 End If
+                
             End If
+            
         Next i
+        
     End If
 
-    For workRow = 3 To lastRowWork
-        itemCodeWork = Trim(CStr(wsWork.Cells(workRow, 4).Value))
+
+    ' ----------------------------------------------------------------
+    ' Loop through Workings and update matching items
+    ' ----------------------------------------------------------------
+    
+    For workRow = START_ROW_WORK To lastRowWork
+        
+        ' Get item code from Workings
+        itemCodeWork = Trim(CStr(wsWork.Cells(workRow, lookupColWork).Value))
+        
+        
+        ' Skip blank item codes
         If itemCodeWork <> "" Then
-            If IsNumeric(itemCodeWork) Then
-                If codeDict.Exists(itemCodeWork) Then
-                    newRow = codeDict(itemCodeWork)
-                    For i = 0 To UBound(colMap, 1)
-                        Set srcCell = wsNew.Cells(newRow, colMap(i, 0))
-                        Set dstCell = wsWork.Cells(workRow, colMap(i, 1))
-                        dstCell.Value = srcCell.Value
-                        dstCell.Interior.Color = srcCell.Interior.Color
-                        dstCell.Interior.Pattern = srcCell.Interior.Pattern
-                    Next i
-                End If
+            
+            
+            ' Look for matching item in New
+            If codeDict.Exists(itemCodeWork) Then
+                
+                newRow = codeDict(itemCodeWork)
+                
+                
+                ' ----------------------------------------------------
+                ' Copy each mapped Sales / Stock value
+                ' ----------------------------------------------------
+                
+                For i = 0 To UBound(colMap, 1)
+                    
+                    Set srcCell = wsNew.Cells( _
+                        newRow, _
+                        colMap(i, 0) _
+                    )
+                    
+                    Set dstCell = wsWork.Cells( _
+                        workRow, _
+                        colMap(i, 1) _
+                    )
+                    
+                    
+                    ' Copy value
+                    dstCell.Value = srcCell.Value
+                    
+                    
+                    ' Copy fill colour / pattern
+                    dstCell.Interior.Color = srcCell.Interior.Color
+                    dstCell.Interior.Pattern = srcCell.Interior.Pattern
+                    
+                Next i
+                
             End If
+            
         End If
+        
     Next workRow
 
-CleanFail:
+
+CleanExit:
+
+    ' ----------------------------------------------------------------
+    ' Restore Excel settings
+    ' ----------------------------------------------------------------
+    
     Application.Calculation = xlCalculationAutomatic
     Application.EnableEvents = True
     Application.ScreenUpdating = True
-
+    
+    
+    ' ----------------------------------------------------------------
+    ' Completion message
+    ' ----------------------------------------------------------------
+    
     If Err.Number <> 0 Then
-        MsgBox "Error " & Err.Number & ": " & Err.Description, vbExclamation
+        
+        MsgBox _
+            "Error " & Err.Number & ": " & Err.Description, _
+            vbExclamation
+        
     Else
-        MsgBox "Done! Sales and Stocks updated in Workings.", vbInformation
+        
+        MsgBox _
+            "Done! Sales and Stocks updated in Workings.", _
+            vbInformation
+        
     End If
+    
+    Exit Sub
+
+
+CleanFail:
+
+    Resume CleanExit
+
 End Sub
 
-' Converts a column letter (e.g. "BV") to its column number (e.g. 74).
-' Pure math, no dependency on any worksheet.
+
+' ====================================================================
+' Converts a column letter into its column number
+'
+' Example:
+'   "A"  -> 1
+'   "E"  -> 5
+'   "BV" -> 74
+'   "CR" -> 96
+' ====================================================================
+
 Function ColLetterToNum(ByVal colLetter As String) As Long
+
     Dim i As Long
     Dim c As Long
+    
     ColLetterToNum = 0
+    
+    
     For i = 1 To Len(colLetter)
+        
         c = Asc(UCase(Mid(colLetter, i, 1))) - 64
+        
         ColLetterToNum = ColLetterToNum * 26 + c
+        
     Next i
+
 End Function
+
