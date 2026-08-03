@@ -7,10 +7,10 @@ Sub ClearValuesKeepFormulas()
     Set ws = ThisWorkbook.Sheets("Workings")
 
     ' === SETTINGS ===
-    Const START_ROW As Long = 10
-    Const END_ROW As Long = 5000
-    Const START_COL As String = "E"
-    Const END_COL As String = "CR"
+    Const START_ROW As Long = 5
+    Const END_ROW As Long = 400
+    Const START_COL As String = "BT"
+    Const END_COL As String = "IF"
     ' =================
 
     ' Define range to check
