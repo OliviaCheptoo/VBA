@@ -1,0 +1,400 @@
+
+Option Explicit
+
+Sub UpdateMetrics()
+
+    Dim wsSource As Worksheet
+    Dim wsWork As Worksheet
+    
+    Dim dataArr As Variant
+    Dim dataDicts() As Object
+    
+    Dim configurations As Variant
+    Dim totals As Variant
+    
+    Dim lastSource As Long
+    Dim lastWork As Long
+    
+    Dim i As Long
+    Dim j As Long
+    Dim workRow As Long
+    
+    Dim itemCode As String
+    Dim workCode As String
+    Dim channel As String
+    
+    Dim qtyIndex As Long
+    Dim revIndex As Long
+    Dim gpIndex As Long
+    
+    Dim codeIndex As Long
+    Dim channelIndex As Long
+    
+    Dim destQtyCol As Long
+    Dim destRevCol As Long
+    Dim destGPCol As Long
+    
+    Const SOURCE_SHEET As String = "Budget"
+    Const WORK_SHEET As String = "Workings"
+    
+    Const COL_CODE As String = "E"
+    Const COL_CHANNEL As String = "D"
+    
+    Const CONVERT_CODE_TO_NUMBER As Boolean = False
+    
+    
+    '========================================================
+    ' CONFIGURATION
+    '
+    ' Array:
+    '
+    ' Period
+    ' Channel
+    ' Destination Qty
+    ' Destination Rev
+    ' Destination GP
+    '
+    ' Blank channel = ALL CHANNELS
+    '========================================================
+    
+    configurations = Array( _
+        Array("YTD", "", "BV", "BW", "BX"), _
+        Array("YTD", "RETAIL", "CJ", "CK", "CL"), _
+        Array("YTD", "B2B", "CX", "CY", "CZ"), _
+        Array("YTD", "ONLINE", "DL", "DM", "DN"), _
+        Array("YTD", "EXPORT", "DZ", "EA", "EB"), _
+        Array("YTD", "MT", "EN", "EO", "EP"), _
+        Array("MTD", "", "FC", "FD", "FE"), _
+        Array("MTD", "RETAIL", "FR", "FS", "FT"), _
+        Array("MTD", "B2B", "GF", "GG", "GH"), _
+        Array("MTD", "ONLINE", "GT", "GU", "GV"), _
+        Array("MTD", "EXPORT", "HH", "HI", "HJ"), _
+        Array("MTD", "MT", "HV", "HW", "HX") _
+    )
+    
+    
+    On Error GoTo CleanFail
+    
+    
+    '========================================================
+    ' PERFORMANCE SETTINGS
+    '========================================================
+    
+    Application.ScreenUpdating = False
+    Application.EnableEvents = False
+    Application.Calculation = xlCalculationManual
+    
+    
+    Set wsSource = ThisWorkbook.Sheets(SOURCE_SHEET)
+    Set wsWork = ThisWorkbook.Sheets(WORK_SHEET)
+    
+    
+    '========================================================
+    ' FIND LAST SOURCE ROW
+    '========================================================
+    
+    lastSource = wsSource.Cells( _
+                    wsSource.Rows.Count, _
+                    ColLetterToNum(COL_CODE)).End(xlUp).Row
+    
+    
+    '========================================================
+    ' LOAD BUDGET INTO MEMORY ONCE
+    '
+    ' IMPORTANT:
+    ' We start at D, NOT E, because Channel is in D.
+    '
+    ' D:AT
+    '========================================================
+    
+    dataArr = wsSource.Range( _
+                wsSource.Cells(2, ColLetterToNum("D")), _
+                wsSource.Cells(lastSource, ColLetterToNum("AT")) _
+              ).value
+    
+    
+    '========================================================
+    ' ARRAY INDEXES
+    '
+    ' Array starts at D = 1
+    '
+    ' D  = 1  Channel
+    ' E  = 2  Code
+    ' L  = 9  MTD Qty
+    ' T  = 17 YTD Qty
+    ' Y  = 22 MTD Rev
+    ' AG = 30 YTD Rev
+    ' AL = 35 MTD GP
+    ' AT = 43 YTD GP
+    '========================================================
+    
+    channelIndex = ColLetterToNum("D") - ColLetterToNum("D") + 1
+    codeIndex = ColLetterToNum("E") - ColLetterToNum("D") + 1
+    
+    '========================================================
+    ' CREATE ONE DICTIONARY FOR EACH CONFIGURATION
+    '========================================================
+    
+    ReDim dataDicts(LBound(configurations) To UBound(configurations))
+    
+    
+    '========================================================
+    ' BUILD ALL DICTIONARIES
+    '========================================================
+    
+    For j = LBound(configurations) To UBound(configurations)
+        
+        Set dataDicts(j) = CreateObject("Scripting.Dictionary")
+        
+        
+        '--------------------------------------------
+        ' Determine source columns based on period
+        '--------------------------------------------
+        
+        If configurations(j)(0) = "YTD" Then
+            
+            qtyIndex = ColLetterToNum("T") - ColLetterToNum("D") + 1
+            revIndex = ColLetterToNum("AG") - ColLetterToNum("D") + 1
+            gpIndex = ColLetterToNum("AT") - ColLetterToNum("D") + 1
+            
+        Else
+            
+            qtyIndex = ColLetterToNum("L") - ColLetterToNum("D") + 1
+            revIndex = ColLetterToNum("Y") - ColLetterToNum("D") + 1
+            gpIndex = ColLetterToNum("AL") - ColLetterToNum("D") + 1
+            
+        End If
+        
+        
+        '--------------------------------------------
+        ' LOOP THROUGH SOURCE ARRAY
+        '--------------------------------------------
+        
+        For i = 1 To UBound(dataArr, 1)
+            
+            '----------------------------------------
+            ' GET CHANNEL FROM ARRAY
+            '----------------------------------------
+            
+            channel = UCase(Trim(CStr(dataArr(i, channelIndex))))
+            
+            
+            '----------------------------------------
+            ' CHANNEL FILTER
+            '
+            ' Blank = All Channels
+            '----------------------------------------
+            
+            If configurations(j)(1) <> "" Then
+                
+                If channel <> UCase(configurations(j)(1)) Then
+                    GoTo NextSourceRow
+                End If
+                
+            End If
+            
+            
+            '----------------------------------------
+            ' GET ITEM CODE
+            '----------------------------------------
+            
+            If CONVERT_CODE_TO_NUMBER Then
+                
+                itemCode = Trim(CStr(Val(dataArr(i, codeIndex))))
+                
+            Else
+                
+                itemCode = Trim(CStr(dataArr(i, codeIndex)))
+                
+            End If
+            
+            
+            If itemCode <> "" Then
+                
+                '------------------------------------
+                ' CODE ALREADY EXISTS
+                '------------------------------------
+                
+                If dataDicts(j).Exists(itemCode) Then
+                    
+                    totals = dataDicts(j)(itemCode)
+                    
+                    
+                    If IsNumeric(dataArr(i, qtyIndex)) Then
+                        totals(0) = totals(0) + CDbl(dataArr(i, qtyIndex))
+                    End If
+                    
+                    
+                    If IsNumeric(dataArr(i, revIndex)) Then
+                        totals(1) = totals(1) + CDbl(dataArr(i, revIndex))
+                    End If
+                    
+                    
+                    If IsNumeric(dataArr(i, gpIndex)) Then
+                        totals(2) = totals(2) + CDbl(dataArr(i, gpIndex))
+                    End If
+                    
+                    
+                    dataDicts(j)(itemCode) = totals
+                    
+                    
+                '------------------------------------
+                ' NEW CODE
+                '------------------------------------
+                
+                Else
+                    
+                    dataDicts(j).Add itemCode, Array( _
+                        SafeNumber(dataArr(i, qtyIndex)), _
+                        SafeNumber(dataArr(i, revIndex)), _
+                        SafeNumber(dataArr(i, gpIndex)) _
+                    )
+                    
+                End If
+                
+            End If
+            
+            
+NextSourceRow:
+            
+        Next i
+        
+    Next j
+    
+    
+    '========================================================
+    ' FIND LAST WORKINGS ROW
+    '========================================================
+    
+    lastWork = wsWork.Cells( _
+                    wsWork.Rows.Count, _
+                    4).End(xlUp).Row
+    
+    
+    '========================================================
+    ' UPDATE WORKINGS
+    '========================================================
+    
+    For workRow = 3 To lastWork
+        
+        workCode = Trim(CStr(wsWork.Cells(workRow, 4).value))
+        
+        
+        If workCode <> "" Then
+            
+            
+            '--------------------------------------------
+            ' PROCESS ALL 12 CONFIGURATIONS
+            '--------------------------------------------
+            
+            For j = LBound(configurations) To UBound(configurations)
+                
+                
+                destQtyCol = ColLetterToNum(configurations(j)(2))
+                destRevCol = ColLetterToNum(configurations(j)(3))
+                destGPCol = ColLetterToNum(configurations(j)(4))
+                
+                
+                If dataDicts(j).Exists(workCode) Then
+                    
+                    totals = dataDicts(j)(workCode)
+                    
+                    wsWork.Cells(workRow, destQtyCol).value = totals(0)
+                    wsWork.Cells(workRow, destRevCol).value = totals(1)
+                    wsWork.Cells(workRow, destGPCol).value = totals(2)
+                    
+                Else
+                    
+                    ' No matching data
+                    wsWork.Cells(workRow, destQtyCol).value = 0
+                    wsWork.Cells(workRow, destRevCol).value = 0
+                    wsWork.Cells(workRow, destGPCol).value = 0
+                    
+                End If
+                
+            Next j
+            
+        End If
+        
+    Next workRow
+    
+    
+    '========================================================
+    ' RESTORE EXCEL
+    '========================================================
+    
+    Application.Calculation = xlCalculationAutomatic
+    Application.EnableEvents = True
+    Application.ScreenUpdating = True
+    
+    
+    MsgBox "YTD and MTD metrics updated successfully.", _
+           vbInformation, "Update Complete"
+    
+    Exit Sub
+
+
+'============================================================
+' ERROR HANDLER
+'============================================================
+
+CleanFail:
+
+    Application.Calculation = xlCalculationAutomatic
+    Application.EnableEvents = True
+    Application.ScreenUpdating = True
+    
+    MsgBox "Error " & Err.Number & ": " & Err.Description, _
+           vbExclamation, "Update Failed"
+
+End Sub
+
+
+
+'============================================================
+' SAFE NUMBER
+'============================================================
+
+Function SafeNumber(ByVal value As Variant) As Double
+
+    If IsError(value) Then
+        
+        SafeNumber = 0
+        
+    ElseIf IsNumeric(value) Then
+        
+        SafeNumber = CDbl(value)
+        
+    Else
+        
+        SafeNumber = 0
+        
+    End If
+
+End Function
+
+
+
+'============================================================
+' COLUMN LETTER TO NUMBER
+'============================================================
+
+Function ColLetterToNum(ByVal colLetter As String) As Long
+
+    Dim i As Long
+    Dim c As Long
+    
+    ColLetterToNum = 0
+    
+    For i = 1 To Len(colLetter)
+        
+        c = Asc(UCase(Mid(colLetter, i, 1))) - 64
+        
+        ColLetterToNum = ColLetterToNum * 26 + c
+        
+    Next i
+
+End Function
+
+
+
