@@ -92,17 +92,17 @@ Sub UpdateSalesMetrics()
 
     configurations = Array( _
         Array("YTD", "", "BZ", "CA", "CB"), _
-        Array("YTD", "RETAIL", "CN", "CO", "CP"), _
-        Array("YTD", "B2B", "DB", "DC", "DD"), _
-        Array("YTD", "ONLINE", "DP", "DQ", "DR"), _
-        Array("YTD", "EXPORT", "ED", "EE", "EF"), _
-        Array("YTD", "MODERN TRADE", "ER", "ES", "ET"), _
-        Array("MTD", "", "FG", "FH", "FI"), _
-        Array("MTD", "RETAIL", "FV", "FW", "FX"), _
-        Array("MTD", "B2B", "GJ", "GK", "GL"), _
-        Array("MTD", "ONLINE", "GX", "GY", "GZ"), _
-        Array("MTD", "EXPORT", "HL", "HM", "HN"), _
-        Array("MTD", "MODERN TRADE", "HZ", "IA", "IB") _
+        Array("YTD", "RETAIL", "DB", "DC", "DD"), _
+        Array("YTD", "B2B", "ED", "EE", "EF"), _
+        Array("YTD", "ONLINE", "FF", "FG", "FH"), _
+        Array("YTD", "EXPORT", "GH", "GI", "GJ"), _
+        Array("YTD", "MODERN TRADE", "HJ", "HK", "HL"), _
+        Array("MTD", "", "CN", "CO", "CP"), _
+        Array("MTD", "RETAIL", "DP", "DQ", "DR"), _
+        Array("MTD", "B2B", "ER", "ES", "ET"), _
+        Array("MTD", "ONLINE", "FT", "FU", "FV"), _
+        Array("MTD", "EXPORT", "GV", "GW", "GX"), _
+        Array("MTD", "MODERN TRADE", "HY", "HZ", "IA") _
     )
 
 
