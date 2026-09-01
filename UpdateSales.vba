@@ -52,7 +52,7 @@ Sub UpdateSalesMetrics()
     ' 2 = February
     ' ...
     ' 12 = December
-    Const REPORT_MONTH As Long = 8
+    Const REPORT_MONTH As Long = 9
 
     Const CONVERT_CODE_TO_NUMBER As Boolean = False
 
@@ -91,18 +91,18 @@ Sub UpdateSalesMetrics()
     '==================================================================
 
     configurations = Array( _
-        Array("YTD", "", "BZ", "CA", "CB"), _
-        Array("YTD", "RETAIL", "DB", "DC", "DD"), _
-        Array("YTD", "B2B", "ED", "EE", "EF"), _
-        Array("YTD", "ONLINE", "FF", "FG", "FH"), _
-        Array("YTD", "EXPORT", "GH", "GI", "GJ"), _
-        Array("YTD", "MODERN TRADE", "HJ", "HK", "HL"), _
-        Array("MTD", "", "CN", "CO", "CP"), _
-        Array("MTD", "RETAIL", "DP", "DQ", "DR"), _
-        Array("MTD", "B2B", "ER", "ES", "ET"), _
-        Array("MTD", "ONLINE", "FT", "FU", "FV"), _
-        Array("MTD", "EXPORT", "GV", "GW", "GX"), _
-        Array("MTD", "MODERN TRADE", "HY", "HZ", "IA") _
+        Array("YTD", "", "BU", "BV", "BW"), _
+        Array("MTD", "", "CI", "CJ", "CK"), _
+        Array("YTD", "RETAIL", "CW", "CX", "CY"), _
+        Array("MTD", "RETAIL", "DK", "DL", "DM"), _
+        Array("YTD", "B2B", "DY", "DZ", "EA"), _
+        Array("MTD", "B2B", "EM", "EN", "EO"), _
+        Array("YTD", "ONLINE", "FA", "FB", "FC"), _
+        Array("MTD", "ONLINE", "FO", "FP", "FQ"), _
+        Array("YTD", "EXPORT", "GC", "GD", "GE"), _
+        Array("MTD", "EXPORT", "GQ", "GR", "GS"), _
+        Array("YTD", "MODERN TRADE", "HE", "HF", "HG"), _
+        Array("MTD", "MODERN TRADE", "HT", "HU", "HV") _
     )
 
 
