@@ -1,4 +1,3 @@
-
 Option Explicit
 
 Sub UpdateMetrics()
@@ -10,6 +9,8 @@ Sub UpdateMetrics()
     Dim dataDicts() As Object
     
     Dim configurations As Variant
+    Dim periodSourceColumns As Variant
+    Dim offsets As Variant
     Dim totals As Variant
     
     Dim lastSource As Long
@@ -44,11 +45,33 @@ Sub UpdateMetrics()
     
     
     '========================================================
+    ' PERIOD SOURCE COLUMNS (Budget sheet)
+    '
+    ' Array:
+    '
+    ' Period Name
+    ' Qty Column
+    ' Rev Column
+    ' GP Column
+    '
+    ' Add a new row here to support a new period (e.g. "LY",
+    ' "FCST") without touching any code below. The period
+    ' name here must match the period name used in the
+    ' "configurations" array further down.
+    '========================================================
+    
+    periodSourceColumns = Array( _
+        Array("YTD", "T", "AG", "AT"), _
+        Array("MTD", "M", "Z", "AM") _
+    )
+    
+    
+    '========================================================
     ' CONFIGURATION
     '
     ' Array:
     '
-    ' Period
+    ' Period            (must match a name in periodSourceColumns)
     ' Channel
     ' Destination Qty
     ' Destination Rev
@@ -63,7 +86,7 @@ Sub UpdateMetrics()
         Array("YTD", "RETAIL", "CS", "CT", "CU"), _
         Array("MTD", "RETAIL", "DG", "DH", "DI"), _
         Array("YTD", "B2B", "DU", "DV", "DW"), _
-        Array("MTD", "B2B", "EI", "EJ", "EK"), _        
+        Array("MTD", "B2B", "EI", "EJ", "EK"), _
         Array("YTD", "ONLINE", "EW", "EX", "EY"), _
         Array("MTD", "ONLINE", "FK", "FL", "FM"), _
         Array("YTD", "EXPORT", "FY", "FZ", "GA"), _
@@ -120,12 +143,9 @@ Sub UpdateMetrics()
     '
     ' D  = 1  Channel
     ' E  = 2  Code
-    ' L  = 9  MTD Qty
-    ' T  = 17 YTD Qty
-    ' Y  = 22 MTD Rev
-    ' AG = 30 YTD Rev
-    ' AL = 35 MTD GP
-    ' AT = 43 YTD GP
+    '
+    ' Qty/Rev/GP indexes are now resolved per-period via
+    ' GetPeriodOffsets() below, instead of being hardcoded.
     '========================================================
     
     channelIndex = ColLetterToNum("D") - ColLetterToNum("D") + 1
@@ -149,21 +169,15 @@ Sub UpdateMetrics()
         
         '--------------------------------------------
         ' Determine source columns based on period
+        ' (looked up from periodSourceColumns instead
+        ' of a hardcoded If/Else)
         '--------------------------------------------
         
-        If configurations(j)(0) = "YTD" Then
-            
-            qtyIndex = ColLetterToNum("T") - ColLetterToNum("D") + 1
-            revIndex = ColLetterToNum("AG") - ColLetterToNum("D") + 1
-            gpIndex = ColLetterToNum("AT") - ColLetterToNum("D") + 1
-            
-        Else
-            
-            qtyIndex = ColLetterToNum("L") - ColLetterToNum("D") + 1
-            revIndex = ColLetterToNum("Y") - ColLetterToNum("D") + 1
-            gpIndex = ColLetterToNum("AL") - ColLetterToNum("D") + 1
-            
-        End If
+        offsets = GetPeriodOffsets(configurations(j)(0), periodSourceColumns)
+        
+        qtyIndex = offsets(0)
+        revIndex = offsets(1)
+        gpIndex = offsets(2)
         
         
         '--------------------------------------------
@@ -284,7 +298,7 @@ NextSourceRow:
             
             
             '--------------------------------------------
-            ' PROCESS ALL 12 CONFIGURATIONS
+            ' PROCESS ALL CONFIGURATIONS
             '--------------------------------------------
             
             For j = LBound(configurations) To UBound(configurations)
@@ -376,6 +390,49 @@ End Function
 
 
 '============================================================
+' GET PERIOD OFFSETS
+'
+' Looks up a period name (e.g. "YTD") in periodSourceColumns
+' and returns its Qty/Rev/GP column indexes, already converted
+' to be relative to column D (i.e. ready to use directly
+' against dataArr).
+'
+' Raises an error if the period name isn't found, so a typo
+' in "configurations" fails loudly instead of silently
+' returning zeros.
+'============================================================
+
+Function GetPeriodOffsets(ByVal periodName As String, ByVal periodCols As Variant) As Variant
+
+    Dim k As Long
+    Dim baseCol As Long
+    
+    baseCol = ColLetterToNum("D")
+    
+    For k = LBound(periodCols) To UBound(periodCols)
+        
+        If UCase(Trim(periodCols(k)(0))) = UCase(Trim(periodName)) Then
+            
+            GetPeriodOffsets = Array( _
+                ColLetterToNum(periodCols(k)(1)) - baseCol + 1, _
+                ColLetterToNum(periodCols(k)(2)) - baseCol + 1, _
+                ColLetterToNum(periodCols(k)(3)) - baseCol + 1 _
+            )
+            
+            Exit Function
+            
+        End If
+        
+    Next k
+    
+    Err.Raise vbObjectError + 1, "GetPeriodOffsets", _
+        "Unknown period '" & periodName & "' - add it to periodSourceColumns."
+
+End Function
+
+
+
+'============================================================
 ' COLUMN LETTER TO NUMBER
 '============================================================
 
@@ -395,6 +452,3 @@ Function ColLetterToNum(ByVal colLetter As String) As Long
     Next i
 
 End Function
-
-
-
