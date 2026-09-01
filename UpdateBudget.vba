@@ -58,18 +58,18 @@ Sub UpdateMetrics()
     '========================================================
     
     configurations = Array( _
-        Array("YTD", "", "BV", "BW", "BX"), _
-        Array("YTD", "RETAIL", "CJ", "CK", "CL"), _
-        Array("YTD", "B2B", "CX", "CY", "CZ"), _
-        Array("YTD", "ONLINE", "DL", "DM", "DN"), _
-        Array("YTD", "EXPORT", "DZ", "EA", "EB"), _
-        Array("YTD", "MT", "EN", "EO", "EP"), _
-        Array("MTD", "", "FC", "FD", "FE"), _
-        Array("MTD", "RETAIL", "FR", "FS", "FT"), _
-        Array("MTD", "B2B", "GF", "GG", "GH"), _
-        Array("MTD", "ONLINE", "GT", "GU", "GV"), _
-        Array("MTD", "EXPORT", "HH", "HI", "HJ"), _
-        Array("MTD", "MT", "HV", "HW", "HX") _
+        Array("YTD", "", "BQ", "BR", "BS"), _
+        Array("MTD", "", "CE", "CF", "CG"), _
+        Array("YTD", "RETAIL", "CS", "CT", "CU"), _
+        Array("MTD", "RETAIL", "DG", "DH", "DI"), _
+        Array("YTD", "B2B", "DU", "DV", "DW"), _
+        Array("MTD", "B2B", "EI", "EJ", "EK"), _        
+        Array("YTD", "ONLINE", "EW", "EX", "EY"), _
+        Array("MTD", "ONLINE", "FK", "FL", "FM"), _
+        Array("YTD", "EXPORT", "FY", "FZ", "GA"), _
+        Array("MTD", "EXPORT", "GM", "GN", "GO"), _
+        Array("YTD", "MT", "HA", "HB", "HC"), _
+        Array("MTD", "MT", "HP", "HQ", "HR") _
     )
     
     
