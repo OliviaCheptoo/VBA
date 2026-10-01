@@ -58,22 +58,22 @@ Sub UpdateSalesAndStocks()
     ' Right side = column on "Workings"
     
     Const COL_SALES_NEW As String = "BV"
-    Const COL_SALES_WORK As String = "AV"
+    Const COL_SALES_WORK As String = "AX"
     
     Const COL_SALES_TOTAL_NEW As String = "CB"
-    Const COL_SALES_TOTAL_WORK As String = "AW"
+    Const COL_SALES_TOTAL_WORK As String = "AY"
     
     Const COL_PHYS_STOCK_NEW As String = "CO"
-    Const COL_PHYS_STOCK_WORK As String = "BH"
+    Const COL_PHYS_STOCK_WORK As String = "BJ"
     
     Const COL_SEA_NEW As String = "CP"
-    Const COL_SEA_WORK As String = "BI"
+    Const COL_SEA_WORK As String = "BK"
     
     Const COL_GRL_NEW As String = "CQ"
-    Const COL_GRL_WORK As String = "BJ"
+    Const COL_GRL_WORK As String = "BL"
     
     Const COL_UNSHIPPED_NEW As String = "CR"
-    Const COL_UNSHIPPED_WORK As String = "BK"
+    Const COL_UNSHIPPED_WORK As String = "BM"
     
     ' ================================================================
     '                    END MONTHLY SETTINGS
@@ -170,7 +170,7 @@ Sub UpdateSalesAndStocks()
         modelArr = wsNew.Range( _
             wsNew.Cells(START_ROW_NEW, lookupColNew), _
             wsNew.Cells(lastRowNew, lookupColNew) _
-        ).Value
+        ).value
         
         
         For i = 1 To UBound(modelArr, 1)
@@ -215,7 +215,7 @@ Sub UpdateSalesAndStocks()
     For workRow = START_ROW_WORK To lastRowWork
         
         ' Get item code from Workings
-        itemCodeWork = Trim(CStr(wsWork.Cells(workRow, lookupColWork).Value))
+        itemCodeWork = Trim(CStr(wsWork.Cells(workRow, lookupColWork).value))
         
         
         ' Skip blank item codes
@@ -246,7 +246,7 @@ Sub UpdateSalesAndStocks()
                     
                     
                     ' Copy value
-                    dstCell.Value = srcCell.Value
+                    dstCell.value = srcCell.value
                     
                     
                     ' Copy fill colour / pattern
@@ -286,7 +286,7 @@ CleanExit:
     Else
         
         MsgBox _
-            "Done! Sept Sales and Stocks updated in Workings.", _
+            "Done! Oct Sales and Stocks updated in Workings.", _
             vbInformation
         
     End If
@@ -328,4 +328,5 @@ Function ColLetterToNum(ByVal colLetter As String) As Long
     Next i
 
 End Function
+
 
