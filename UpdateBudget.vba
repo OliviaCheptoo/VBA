@@ -62,7 +62,7 @@ Sub UpdateMetrics()
     
     periodSourceColumns = Array( _
         Array("YTD", "T", "AG", "AT"), _
-        Array("MTD", "M", "Z", "AM") _
+        Array("MTD", "N", "AA", "AN") _
     )
     
     
@@ -81,18 +81,18 @@ Sub UpdateMetrics()
     '========================================================
     
     configurations = Array( _
-        Array("YTD", "", "BQ", "BR", "BS"), _
-        Array("MTD", "", "CE", "CF", "CG"), _
-        Array("YTD", "RETAIL", "CS", "CT", "CU"), _
-        Array("MTD", "RETAIL", "DG", "DH", "DI"), _
-        Array("YTD", "B2B", "DU", "DV", "DW"), _
-        Array("MTD", "B2B", "EI", "EJ", "EK"), _
-        Array("YTD", "ONLINE", "EW", "EX", "EY"), _
-        Array("MTD", "ONLINE", "FK", "FL", "FM"), _
-        Array("YTD", "EXPORT", "FY", "FZ", "GA"), _
-        Array("MTD", "EXPORT", "GM", "GN", "GO"), _
-        Array("YTD", "MT", "HA", "HB", "HC"), _
-        Array("MTD", "MT", "HP", "HQ", "HR") _
+        Array("YTD", "", "BS", "BT", "BU"), _
+        Array("MTD", "", "CG", "CH", "CI"), _
+        Array("YTD", "RETAIL", "CU", "CV", "CW"), _
+        Array("MTD", "RETAIL", "DI", "DJ", "DK"), _
+        Array("YTD", "B2B", "DW", "DX", "DY"), _
+        Array("MTD", "B2B", "EK", "EL", "EM"), _
+        Array("YTD", "ONLINE", "EY", "EZ", "FA"), _
+        Array("MTD", "ONLINE", "FM", "FN", "FO"), _
+        Array("YTD", "EXPORT", "GA", "GB", "GC"), _
+        Array("MTD", "EXPORT", "GO", "GP", "GQ"), _
+        Array("YTD", "MT", "HC", "HD", "HE"), _
+        Array("MTD", "MT", "HR", "HS", "HT") _
     )
     
     
@@ -452,3 +452,4 @@ Function ColLetterToNum(ByVal colLetter As String) As Long
     Next i
 
 End Function
+
