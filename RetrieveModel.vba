@@ -8,8 +8,8 @@ Function ExtractModelNumber(ByVal desc As String) As String
     
     ' Create RegExp object
     Set regex = CreateObject("VBScript.RegExp")
-    ' Updated pattern to match model numbers (alphanumeric with dashes)
-    regex.Pattern = "\b[A-Z]{1,}[A-Z0-9-]*[0-9]+[A-Z0-9-]*\b" ' Matches model numbers
+    ' Pattern to match model numbers (alphanumeric with dashes)
+    regex.Pattern = "\b[A-Z]{1,}[A-Z0-9-]*[0-9]+[A-Z0-9-]*\b"
     regex.Global = True
     
     ' Find matches
@@ -33,20 +33,25 @@ Sub RetrieveModelNumbers()
     Dim ws As Worksheet
     Dim lastRow As Long
     Dim i As Long
-    Dim modelNumbers As String
     
-    ' Set the worksheet
-    Set ws = ThisWorkbook.Sheets("description")
+    ' Run on whichever sheet is currently active
+    Set ws = ActiveSheet
     
     ' Find the last row in column A
     lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
     
-    ' Loop through each cell in column A
-    For i = 2 To lastRow ' Assuming row 1 is headers
-        modelNumbers = ExtractModelNumber(ws.Cells(i, 1).Value) ' Extract model numbers
-        ws.Cells(i, 2).Value = modelNumbers ' Write results to column B
+    Application.ScreenUpdating = False
+    
+    ' Insert a new column B (existing column B and beyond shift right)
+    ws.Columns(2).Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+    ws.Cells(1, 2).Value = "Model Number"
+    
+    ' Loop through column A (row 1 assumed to be headers)
+    For i = 2 To lastRow
+        ws.Cells(i, 2).Value = ExtractModelNumber(CStr(ws.Cells(i, 1).Value))
     Next i
+    
+    Application.ScreenUpdating = True
     
     MsgBox "Model numbers extracted successfully!", vbInformation
 End Sub
-
