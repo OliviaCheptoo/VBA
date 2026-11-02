@@ -58,22 +58,22 @@ Sub UpdateSalesAndStocks()
     ' Right side = column on "Workings"
     
     Const COL_SALES_NEW As String = "BV"
-    Const COL_SALES_WORK As String = "AX"
+    Const COL_SALES_WORK As String = "AT"
     
     Const COL_SALES_TOTAL_NEW As String = "CB"
-    Const COL_SALES_TOTAL_WORK As String = "AY"
+    Const COL_SALES_TOTAL_WORK As String = "AU"
     
     Const COL_PHYS_STOCK_NEW As String = "CO"
-    Const COL_PHYS_STOCK_WORK As String = "BJ"
+    Const COL_PHYS_STOCK_WORK As String = "BG"
     
     Const COL_SEA_NEW As String = "CP"
-    Const COL_SEA_WORK As String = "BK"
+    Const COL_SEA_WORK As String = "BH"
     
     Const COL_GRL_NEW As String = "CQ"
-    Const COL_GRL_WORK As String = "BL"
+    Const COL_GRL_WORK As String = "BI"
     
     Const COL_UNSHIPPED_NEW As String = "CR"
-    Const COL_UNSHIPPED_WORK As String = "BM"
+    Const COL_UNSHIPPED_WORK As String = "BJ"
     
     ' ================================================================
     '                    END MONTHLY SETTINGS
@@ -286,7 +286,7 @@ CleanExit:
     Else
         
         MsgBox _
-            "Done! Oct Sales and Stocks updated in Workings.", _
+            "Done! Nov Sales and Stocks updated in Workings.", _
             vbInformation
         
     End If
@@ -328,5 +328,6 @@ Function ColLetterToNum(ByVal colLetter As String) As Long
     Next i
 
 End Function
+
 
 
