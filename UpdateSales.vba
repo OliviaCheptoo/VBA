@@ -52,7 +52,7 @@ Sub UpdateSalesMetrics()
     ' 2 = February
     ' ...
     ' 12 = December
-    Const REPORT_MONTH As Long = 10
+    Const REPORT_MONTH As Long = 11
 
     Const CONVERT_CODE_TO_NUMBER As Boolean = False
 
@@ -91,18 +91,18 @@ Sub UpdateSalesMetrics()
     '==================================================================
 
     configurations = Array( _
-        Array("YTD", "", "BW", "BX", "BY"), _
-        Array("MTD", "", "CK", "CL", "CM"), _
-        Array("YTD", "RETAIL", "CY", "CZ", "DA"), _
-        Array("MTD", "RETAIL", "DM", "DN", "DO"), _
-        Array("YTD", "B2B", "EA", "EB", "EC"), _
-        Array("MTD", "B2B", "EO", "EP", "EQ"), _
-        Array("YTD", "ONLINE", "FC", "FD", "FE"), _
-        Array("MTD", "ONLINE", "FQ", "FR", "FS"), _
-        Array("YTD", "EXPORT", "GE", "GF", "GG"), _
-        Array("MTD", "EXPORT", "GS", "GT", "GU"), _
-        Array("YTD", "MODERN TRADE", "HG", "HH", "HI"), _
-        Array("MTD", "MODERN TRADE", "HV", "HW", "HX") _
+        Array("YTD", "", "BT", "BU", "BV"), _
+        Array("MTD", "", "CH", "CI", "CJ"), _
+        Array("YTD", "RETAIL", "CV", "CW", "CX"), _
+        Array("MTD", "RETAIL", "DJ", "DK", "DL"), _
+        Array("YTD", "B2B", "DX", "DY", "DZ"), _
+        Array("MTD", "B2B", "EL", "EM", "EN"), _
+        Array("YTD", "ONLINE", "EZ", "FA", "FB"), _
+        Array("MTD", "ONLINE", "FN", "FO", "FP"), _
+        Array("YTD", "EXPORT", "GB", "GC", "GD"), _
+        Array("MTD", "EXPORT", "GP", "GQ", "GR"), _
+        Array("YTD", "MODERN TRADE", "HD", "HE", "HF"), _
+        Array("MTD", "MODERN TRADE", "HS", "HT", "HU") _
     )
 
 
@@ -476,6 +476,7 @@ Function ColLetterToNum(ByVal colLetter As String) As Long
     Next i
 
 End Function
+
 
 
 
